@@ -1,58 +1,63 @@
-"use client"
+"use client";
 
-import { useSearchParams } from "next/navigation"
-import { useState, useEffect } from "react"
-import type { Book } from "@/lib/books-data"
-import BookCard from "@/components/book-card"
-import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
-import Pagination from "@/components/pagination"
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import type { Book } from "@/lib/books-data";
+import BookCard from "@/components/book-card";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import Pagination from "@/components/pagination";
 
-const BOOKS_PER_PAGE = 20
+const BOOKS_PER_PAGE = 20;
 
 export default function SearchPage() {
-  const searchParams = useSearchParams()
-  const query = searchParams.get("q") || ""
-  const [books, setBooks] = useState<Book[]>([])
-  const [loading, setLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [total, setTotal] = useState(0)
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q") || "";
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const fetchSearchResults = async (page: number) => {
     if (!query.trim()) {
-      setBooks([])
-      setLoading(false)
-      return
+      setBooks([]);
+      setLoading(false);
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&page=${page}&limit=${BOOKS_PER_PAGE}`)
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(
+          query
+        )}&page=${page}&limit=${BOOKS_PER_PAGE}`
+      );
       if (response.ok) {
-        const data = await response.json()
-        setBooks(data.books || [])
-        setTotalPages(data.totalPages || 1)
-        setTotal(data.total || 0)
+        const data = await response.json();
+        setBooks(data.results.books || []);
+        setTotalPages(data.totalPages || 1);
+        setTotal(data.total || 0);
       }
     } catch (error) {
-      console.error("Failed to search books:", error)
-      setBooks([])
+      console.error("Failed to search books:", error);
+      setBooks([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    setCurrentPage(1)
-    fetchSearchResults(1)
-  }, [query])
+    setCurrentPage(1);
+    fetchSearchResults(1);
+  }, [query]);
+  console.log(books);
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    fetchSearchResults(page)
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+    setCurrentPage(page);
+    fetchSearchResults(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   if (loading) {
     return (
@@ -64,7 +69,7 @@ export default function SearchPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -83,11 +88,17 @@ export default function SearchPage() {
       {books.length === 0 ? (
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-12 shadow-lg border border-white/20 text-center">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-2xl font-bold text-gray-700 mb-2">No books found</h3>
+          <h3 className="text-2xl font-bold text-gray-700 mb-2">
+            No books found
+          </h3>
           <p className="text-gray-500 mb-6">
-            We couldn't find any books matching "{query}". Try different keywords or check your spelling.
+            We couldn't find any books matching "{query}". Try different
+            keywords or check your spelling.
           </p>
-          <Button onClick={() => window.history.back()} className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            onClick={() => window.history.back()}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             Go Back
           </Button>
         </div>
@@ -95,20 +106,23 @@ export default function SearchPage() {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 mb-12">
             {books.map((book) => (
-              <BookCard key={book.id} book={book} isInitiallyInWishlist={false} />
+              <BookCard key={book._id || book.isbn} book={book} />
             ))}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </div>
           )}
         </>
       )}
     </div>
-  )
+  );
 }

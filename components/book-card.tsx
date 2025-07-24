@@ -88,7 +88,7 @@ export default function BookCard({ book, user }: BookCardProps) {
             size="icon"
             className={`absolute top-2 right-2 h-8 w-8 rounded-full transition-all duration-200 z-10 ${
               isInWishlist
-                ? "bg-red-500/90 text-white hover:bg-red-600/90"
+                ? ""
                 : "bg-white/90 text-gray-600 hover:bg-white hover:text-red-500"
             }`}
             onClick={toggleWishlist}
